@@ -1,6 +1,6 @@
 ### Object Database
 
-Object database consists of two `prototype` functions that extend array.
+Object database consists of three `prototype` functions that extend array.
 
 ### The `query` function
 
@@ -9,10 +9,25 @@ ex. `db.query('color == "blue" or "yellow"');`
 
 See below for more examples including regex examples.
 
+*This function is chainable*
+
+### The `sortCol` function
+
+Sorts by a column (auto detects numbers and does a float sort)
+
+ex. `db.sortCol("num", {reverse: true});`
+
+The options available are: `ignoreCase` and `reverse`.
+
+*This function is chainable*
 
 ### The `dump` function
 
 Dumps an array of objects into a pretty table
+
+### Todo:
+
+- Better Number handling for Queries
 
 ex. 
 ```javascript
@@ -132,7 +147,8 @@ db.query('name == "Molly" or "Sandy" or "Lucy" or "Alice" && color == green').du
 
 ```javascript
 // multi query 'or' -- (Yes, Jeff the Red dosn't exist)
-db.query('name == "Jeff the Red" or "Sandy" or "Alice" || color == red || num == 300', true).dump();
+db.query('name == "Jeff the Red" or "Sandy" or "Alice" || ' +
+            'color == red || num == 300', true).sortCol("name").dump();
 ```
 <pre>
 +--------+-----+---------------------------------+--------+
@@ -147,10 +163,10 @@ db.query('name == "Jeff the Red" or "Sandy" or "Alice" || color == red || num ==
 ! name     ! color  ! num  !
 +----------+--------+------+
 ! Alice    ! blue   !      !
-! Sandy    ! green  ! 10   !
+! Angie    ! blue   ! 300  !
 ! Matthew  ! red    ! 90   !
 ! Peter    ! red    ! 8    !
-! Angie    ! blue   ! 300  !
+! Sandy    ! green  ! 10   !
 +----------+--------+------+
 </pre>
 
@@ -162,7 +178,7 @@ db.query('name == ^.$', true).dump();
 
 // Use Vars
 var color = "blue";
-db.query(`color == ${color}`).dump({exclude:["num"]});
+db.query(`color == ${color}`).sortCol("color").dump({exclude:["num"]});
 
 // Case insensitive
 db.query(`name like matthew`).dump();

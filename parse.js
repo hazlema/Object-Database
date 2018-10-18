@@ -26,10 +26,17 @@ Array.prototype.dump = function(opt={}) {
         cursor.fg.reset();
     }
 
+    function objectArray() {
+        for(var item of db) {
+            if(typeof(item) != "object") return false;
+        }
+        return true;
+    }
+
     var sizes = {};
     var tableData = this;
 
-    if (tableData.length != 0) {
+    if (Array.isArray(tableData) && tableData.length != 0 && objectArray()) {
         // Get col sizes
         for(var item of tableData) {
             for(var key of Object.keys(item)) {
@@ -41,7 +48,7 @@ Array.prototype.dump = function(opt={}) {
         }
 
         // Excludes
-        if ("exclude" in opt) {
+        if ("exclude" in opt || Array.isArray(opt.exclude)) {
             for(var ex of opt.exclude) {
                 delete sizes[ex];
             };
@@ -79,7 +86,46 @@ Array.prototype.dump = function(opt={}) {
             log(row + '|');
         }
         log(sep);
+    } else throw new Error("Not an array -or- not an array of objects");
+}
+
+Array.prototype.sortCol = function(pK, options={}) {
+    var db = this;
+
+    function isKeyNumber(pK) {
+        function isNumber(n) {
+            return (!isNaN(parseFloat(n)) && isFinite(n))
+        }
+        
+        for(var item of db) {
+            if (pK in item && !isNumber(item[pK])) return false;
+        }
+        
+        return true;
     }
+    
+    const isNumber     = isKeyNumber(pK);
+    const isReverse    = ("reverse" in options) ? options.reverse : false;
+    const isIgnoreCase = ("ignoreCase" in options) ? options.ignoreCase : false;
+    
+    db.sort((a,b) => {
+        var result;
+        
+        if (typeof a[pK] == 'undefined') {
+            result = -1;
+        } else {
+            if (isNumber)
+            result = (parseFloat(a[pK]) < parseFloat(b[pK])) ? -1 : 1;
+            else
+            result = (isIgnoreCase) ?
+            (a[pK].toLowerCase() < b[pK].toLowerCase()) ? -1 : 1 :
+            (a[pK] < b[pK]) ? -1 : 1;
+        }
+        
+        return (isReverse) ? result *= -1 : result;
+    });
+
+    return db;
 }
 
 Object.prototype.query = function(Query, showQuery=false) {
@@ -88,43 +134,51 @@ Object.prototype.query = function(Query, showQuery=false) {
     var results = [];
     var query   = buildQuery(Query);
     
-    if (showQuery) query.dump();
-
-    for (var thisTest of query) {
-
-        if ("chain" in thisTest) {
-            if (thisTest.chain == "&&") {
-                // And
-                dataSet = results;
-                results = [];
-            } else {
-                // Or
-                dataSet = db;
+    if (Array.isArray(db) && objectArray()) {
+        if (showQuery) query.dump();
+        
+        for (var thisTest of query) {
+            
+            if ("chain" in thisTest) {
+                if (thisTest.chain == "&&") {
+                    // And
+                    dataSet = results;
+                    results = [];
+                } else {
+                    // Or
+                    dataSet = db;
+                }
+            }
+            
+            for (var row of dataSet) {
+                var test;    
+                var value = String(row[thisTest.key]);
+                
+                var rx = thisTest.value.join(',')
+                .replace(/,or,/g, "|")
+                .replace(/,and,/g, "&");
+                
+                if (thisTest.op == 'like')
+                test = new RegExp(rx, 'i');
+                else test = new RegExp(rx);
+                
+                if (value.match(test) && !results.includes(row)) { 
+                    results.push(row); 
+                }
             }
         }
         
-        for (var row of dataSet) {
-            var test;    
-            var value = String(row[thisTest.key]);
-
-            var rx = thisTest.value.join(',')
-                .replace(/,or,/g, "|")
-                .replace(/,and,/g, "&");
-
-            if (thisTest.op == 'like')
-                test = new RegExp(rx, 'i');
-            else
-                test = new RegExp(rx);
-
-            if (value.match(test) && !results.includes(row)) { 
-                results.push(row); 
-            }
-        }
-    }
-    
-    return results;
+        return results;
+    } else throw new Error("Not an array -or- not an array of objects");
 
     /// -----------------------------------------------------------------
+
+    function objectArray() {
+        for(var item of db) {
+            if(typeof(item) != "object") return false;
+        }
+        return true;
+    }
 
     function buildQuery(query) {
         var queries      = [];
@@ -225,17 +279,13 @@ db = [
     {name:"Angie",   color:'blue',   num:"300"}
 ];
 
-//db.query("name == ^[a-z].*", true).dump();
+db.query("name == ^[a-z].*", true).dump();
+db.query("name == e$ && color like blue", true).dump({exclude:["num"]});
+console.log(db.query('color == "blue" or "yellow"'));
+db.query('color == "blue" or "yellow"', true).sortCol("color",{ignoreCase:true}).dump();
+db.query('name == "Molly" or "Sandy" or "Lucy" or "Alice" && color == green', true).sortCol("num").dump();
+db.query('name == ^.$', true).dump();
+db.query('name == "Jeff the red" or "Sandy" or "Lucy" or "Alice" || color == red || num == 300', true).dump();
 
-//db.query("name == e$ && color like blue", true).dump({exclude:["num"]});
-//console.log(db.query('color == "blue" or "yellow"'));
-
-//db.query('color == "blue" or "yellow"', true).dump();
-
-//db.query('name == "Molly" or "Sandy" or "Lucy" or "Alice" && color == green', true).dump();
- //db.query('name == ^.$', true).dump();
- db.query('name == "Jeff the red" or "Sandy" or "Lucy" or "Alice" || color == red || num == 300', true).dump();
-
-
- ///var color = "blue";
- //db.query(`color == ${color}`, true).dump();
+var color = "blue";
+db.query(`color == ${color}`, true).dump();
