@@ -1,13 +1,26 @@
-### Object Database
+## Object Database
 
 Object database consists of three `prototype` functions that extend array.
-
+- [Object Database](#object-database)
+    - [The `query` function](#the-query-function)
+    - [The `sortCol` function](#the-sortcol-function)
+    - [The `dump` function](#the-dump-function)
+    - [Sample Database](#sample-database)
+    - [Syntax](#syntax)
+    - [Examples](#examples)
+    - [Todo](#todo)
+  
 ### The `query` function
 
 Searches an array of objects using queries (like SQL).  
 ex. `db.query('color == "blue" or "yellow"');`
 
 See below for more examples including regex examples.
+
+**NOTE: if you import a `JSON` database you will need to `eval`
+it before the queries will work. (Convert it back into JS from JSON)**
+
+`db = eval( require("fs").readFileSync(filename, 'utf8') );`
 
 *This function is chainable*
 
@@ -41,10 +54,6 @@ ex.
     {name:"Peter",   color:'red',    num:"8"}
 ].dump({exclude:["num"]});
 ```
-
-### Todo:
-
-- Better Number handling for Queries
 
 ### Sample Database
 
@@ -246,3 +255,7 @@ db.query(`name like matthew`).dump();
 ! Matthew  ! red    ! 90   !
 +----------+--------+------+
 </pre>
+
+### Todo
+
+- Better Number handling for Queries
