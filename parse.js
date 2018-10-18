@@ -279,13 +279,17 @@ db = [
     {name:"Angie",   color:'blue',   num:"300"}
 ];
 
-db.query("name == ^[a-z].*", true).dump();
-db.query("name == e$ && color like blue", true).dump({exclude:["num"]});
-console.log(db.query('color == "blue" or "yellow"'));
-db.query('color == "blue" or "yellow"', true).sortCol("color",{ignoreCase:true}).dump();
-db.query('name == "Molly" or "Sandy" or "Lucy" or "Alice" && color == green', true).sortCol("num").dump();
-db.query('name == ^.$', true).dump();
-db.query('name == "Jeff the red" or "Sandy" or "Lucy" or "Alice" || color == red || num == 300', true).dump();
-
-var color = "blue";
-db.query(`color == ${color}`, true).dump();
+// db.query("name == ^[a-z].*", true).dump();
+// db.query("name == e$ && color like blue", true).dump({exclude:["num"]});
+// console.log(db.query('color == "blue" or "yellow"'));
+// db.query('color == "blue" or "yellow"', true).sortCol("color",{ignoreCase:true}).dump();
+// db.query('name == "Molly" or "Sandy" or "Lucy" or "Alice" && color == green', true).sortCol("num").dump();
+// db.query('name == ^.$', true).dump();
+// db.query('name == "Jeff the red" or "Sandy" or "Lucy" or "Alice" || color == red || num == 300', true).dump();
+// db.sortCol("name",{ignoreCase:true}).dump();
+// db.sortCol("num",{reverse:true}).dump();
+// db.query('name == ^.$', true).dump();
+// var color = "blue";
+// var color2 = "yellow";
+// db.query(`color == "${color}" or "${color2}"`).sortCol("color").dump({exclude:["num"]});
+// db.query(`name like matthew`).dump();

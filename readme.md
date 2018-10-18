@@ -25,10 +25,6 @@ The options available are: `ignoreCase` and `reverse`.
 
 Dumps an array of objects into a pretty table
 
-### Todo:
-
-- Better Number handling for Queries
-
 ex. 
 ```javascript
 [
@@ -46,6 +42,9 @@ ex.
 ].dump({exclude:["num"]});
 ```
 
+### Todo:
+
+- Better Number handling for Queries
 
 ### Sample Database
 
@@ -74,8 +73,10 @@ db = [
 - obj.query(query, true) // Will dump out the query breakdown (debug)
 - obj.query(query).dump() // Will create a pretty table
 - obj.query(query).dump({exclude:["num"]}) // Will exclude the num field from the table dump
+- obj.sortCol("name").dump({exclude:["num"]}) // Will sort by name and exclude the num field
+- obj.query(query).sortCol("num").dump() // Will preform a query then sort the results by number
 
-### Examples (with output)
+### Examples
 
 ```javascript
 // Regular Expressions (Starts with a lower case letter)
@@ -170,17 +171,78 @@ db.query('name == "Jeff the Red" or "Sandy" or "Alice" || ' +
 +----------+--------+------+
 </pre>
 
-### More examples (without output)
+```javascript
+// Number sort reversed
+db.sortCol("num",{reverse:true}).dump();
+```
+
+<pre>
++----------+---------+------+
+! name     ! color   ! num  !
++----------+---------+------+
+! Angie    ! blue    ! 300  !
+! Matthew  ! red     ! 90   !
+! Frank    ! blue    ! 70   !
+! Molly    ! green   ! 50   !
+! Jeff     ! yellow  ! 20   !
+! Sandy    ! green   ! 10   !
+! Peter    ! red     ! 8    !
+! Grace    ! blue    ! 0.3  !
+! Lucy     ! green   ! 0.2  !
+! alex     ! blue    ! 0.1  !
+! steve    ! yellow  ! 0    !
+! Alice    ! blue    !      !
+! Q        ! yellow  !      !
++----------+---------+------+
+</pre>
 
 ```javascript
 // One letter Names
 db.query('name == ^.$', true).dump();
+```
+<pre>
++-------+-----+--------+
+! key   ! op  ! value  !
++-------+-----+--------+
+! name  ! ==  ! ^.$    !
++-------+-----+--------+
 
++-------+---------+
+! name  ! color   !
++-------+---------+
+! Q     ! yellow  !
++-------+---------+
+</pre>
+
+```javascript
 // Use Vars
 var color = "blue";
-db.query(`color == ${color}`).sortCol("color").dump({exclude:["num"]});
+var color2 = "yellow";
+db.query(`color == "${color}" or "${color2}"`).sortCol("color").dump({exclude:["num"]});
+```
+<pre>
++--------+---------+
+! name   ! color   !
++--------+---------+
+! Angie  ! blue    !
+! Grace  ! blue    !
+! Frank  ! blue    !
+! alex   ! blue    !
+! Alice  ! blue    !
+! Jeff   ! yellow  !
+! Q      ! yellow  !
+! steve  ! yellow  !
++--------+---------+
+</pre>
 
+```javascript
 // Case insensitive
 db.query(`name like matthew`).dump();
-
 ```
+<pre>
++----------+--------+------+
+! name     ! color  ! num  !
++----------+--------+------+
+! Matthew  ! red    ! 90   !
++----------+--------+------+
+</pre>
