@@ -263,21 +263,21 @@ Object.prototype.query = function(Query, showQuery=false) {
     }   
 }
 
-db = [
-    {name:"Matthew", color:'red',    num:"90"},
-    {name:"Peter",   color:'red',    num:"8"},
-    {name:"Alice",   color:'blue'},
-    {name:"alex",    color:'blue',   num:"0.1"},
-    {name:"Frank",   color:'blue',   num:"70"},
-    {name:"Grace",   color:'blue',   num:"0.3"},
-    {name:"steve",   color:'yellow', num:"0"},
-    {name:"Q",       color:'yellow'},
-    {name:"Jeff",    color:'yellow', num:"20"},
-    {name:"Lucy",    color:'green',  num:"0.2"},
-    {name:"Molly",   color:'green',  num:"50"},
-    {name:"Sandy",   color:'green',  num:"10"},
-    {name:"Angie",   color:'blue',   num:"300"}
-];
+// db = [
+//     {name:"Matthew", color:'red',    num:"90"},
+//     {name:"Peter",   color:'red',    num:"8"},
+//     {name:"Alice",   color:'blue'},
+//     {name:"alex",    color:'blue',   num:"0.1"},
+//     {name:"Frank",   color:'blue',   num:"70"},
+//     {name:"Grace",   color:'blue',   num:"0.3"},
+//     {name:"steve",   color:'yellow', num:"0"},
+//     {name:"Q",       color:'yellow'},
+//     {name:"Jeff",    color:'yellow', num:"20"},
+//     {name:"Lucy",    color:'green',  num:"0.2"},
+//     {name:"Molly",   color:'green',  num:"50"},
+//     {name:"Sandy",   color:'green',  num:"10"},
+//     {name:"Angie",   color:'blue',   num:"300"}
+// ];
 
 // db.query("name == ^[a-z].*", true).dump();
 // db.query("name == e$ && color like blue", true).dump({exclude:["num"]});
