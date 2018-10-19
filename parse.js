@@ -89,6 +89,27 @@ Array.prototype.dump = function(opt={}) {
     } else throw new Error("Not an array -or- not an array of objects");
 }
 
+String.prototype.mathEx = function(compare, op) {
+    var value = this;
+    var match = false;
+
+    function isNumber(n) {
+        return (!isNaN(parseFloat(n)) && isFinite(n))
+    }
+
+    if (isNumber(value)) value = parseFloat(value); else value = null;
+    
+    for(var tmpCompare of compare.split(/\|/g)) {
+        if (isNumber(tmpCompare)) Compare = parseFloat(tmpCompare); else Compare = null;
+            //console.log(value, op, Compare);
+            if (!eval(`${value} ${op} ${Compare}`)) match = true;
+    }    
+
+    //if (op == "!=") match = (match==true) ? false : true;
+    match = !match;
+    return match;
+}
+
 Array.prototype.sortCol = function(pK, options={}) {
     var db = this;
 
@@ -151,24 +172,36 @@ Object.prototype.query = function(Query, showQuery=false) {
             }
             
             for (var row of dataSet) {
-                var test;    
                 var value = String(row[thisTest.key]);
                 
+                //console.log();
                 var rx = thisTest.value.join(',')
-                .replace(/,or,/g, "|")
-                .replace(/,and,/g, "&");
+                    .replace(/,or,/g, "|")
+                    .replace(/,and,/g, "&");
                 
-                if (thisTest.op == 'like')
-                test = new RegExp(rx, 'i');
-                else test = new RegExp(rx);
+                // What operation ?
+                var testResult = false;
                 
-                if (value.match(test) && !results.includes(row)) { 
+                if(thisTest.op == 'like') {
+                    var test = new RegExp(rx, 'i');
+                    testResult = value.match(test);
+                } else 
+                    if (thisTest.op == '==') {
+                        var test = new RegExp(rx);
+                        testResult = value.match(test);
+                } else 
+                    testResult = value.mathEx(rx, thisTest.op);
+
+                if (testResult && !results.includes(row)) { 
                     results.push(row); 
                 }
             }
         }
         
-        return results;
+        if (results.length == 0) {
+            return [{message:"Your query returned no results"}];
+        } else return results;
+
     } else throw new Error("Not an array -or- not an array of objects");
 
     /// -----------------------------------------------------------------
@@ -263,21 +296,21 @@ Object.prototype.query = function(Query, showQuery=false) {
     }   
 }
 
-// db = [
-//     {name:"Matthew", color:'red',    num:"90"},
-//     {name:"Peter",   color:'red',    num:"8"},
-//     {name:"Alice",   color:'blue'},
-//     {name:"alex",    color:'blue',   num:"0.1"},
-//     {name:"Frank",   color:'blue',   num:"70"},
-//     {name:"Grace",   color:'blue',   num:"0.3"},
-//     {name:"steve",   color:'yellow', num:"0"},
-//     {name:"Q",       color:'yellow'},
-//     {name:"Jeff",    color:'yellow', num:"20"},
-//     {name:"Lucy",    color:'green',  num:"0.2"},
-//     {name:"Molly",   color:'green',  num:"50"},
-//     {name:"Sandy",   color:'green',  num:"10"},
-//     {name:"Angie",   color:'blue',   num:"300"}
-// ];
+var db = [
+    {name:"Matthew", color:'red',    num:"90"},
+    {name:"Peter",   color:'red',    num:"8"},
+    {name:"Alice",   color:'blue'},
+    {name:"alex",    color:'blue',   num:"0.1"},
+    {name:"Frank",   color:'blue',   num:"70"},
+    {name:"Grace",   color:'blue',   num:"0.3"},
+    {name:"steve",   color:'yellow', num:"0"},
+    {name:"Q",       color:'yellow'},
+    {name:"Jeff",    color:'yellow', num:"20"},
+    {name:"Lucy",    color:'green',  num:"0.2"},
+    {name:"Molly",   color:'green',  num:"50"},
+    {name:"Sandy",   color:'green',  num:"10"},
+    {name:"Angie",   color:'blue',   num:"300"}
+];
 
 // db.query("name == ^[a-z].*", true).dump();
 // db.query("name == e$ && color like blue", true).dump({exclude:["num"]});
@@ -293,3 +326,7 @@ Object.prototype.query = function(Query, showQuery=false) {
 // var color2 = "yellow";
 // db.query(`color == "${color}" or "${color2}"`).sortCol("color").dump({exclude:["num"]});
 // db.query(`name like matthew`).dump();
+
+//db.query('color == .* || color == green || color == yellow', true).sortCol("color").dump();
+//num <= 10 && 
+db.query('num != null', true).dump();

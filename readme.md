@@ -6,21 +6,27 @@ Object database consists of three `prototype` functions that extend array.
     - [The `sortCol` function](#the-sortcol-function)
     - [The `dump` function](#the-dump-function)
     - [Sample Database](#sample-database)
-    - [Syntax](#syntax)
     - [Examples](#examples)
-    - [Todo](#todo)
   
 ### The `query` function
 
 Searches an array of objects using queries (like SQL).  
-ex. `db.query('color == "blue" or "yellow"');`
+```javascript
+db.query('
+    [field] 
+        [like | == | != | < | <= | > | >= ] 
+        [value] [and | or] [value] [&& | ||] 
+        [value] [and | or] [value] 
+', [(Debugging) true || false] );
+```
+* See below for more [examples](#examples) including RegEx examples.
 
-See below for more examples including regex examples.
+**NOTE:** if you import a `JSON` database you will need to `eval` it before the queries will work.** (This will convert the DB back into JS from JSON)
 
-**NOTE: if you import a `JSON` database you will need to `eval`
-it before the queries will work. (Convert it back into JS from JSON)**
-
-`db = eval( require("fs").readFileSync(filename, 'utf8') );`
+```javascript
+vsr fs = require("fs");
+db = eval(fs.readFileSync(filename, 'utf8'));`
+```
 
 *This function is chainable*
 
@@ -28,34 +34,24 @@ it before the queries will work. (Convert it back into JS from JSON)**
 
 Sorts by a column (auto detects numbers and does a float sort)
 
-ex. `db.sortCol("num", {reverse: true});`
-
-The options available are: `ignoreCase` and `reverse`.
+```javascript
+db.sortCol( [field], {reverse:false, ignoreCase:true} );
+```
 
 *This function is chainable*
 
 ### The `dump` function
 
-Dumps an array of objects into a pretty table
+Dumps an array of objects into a formatted table.
 
-ex. 
 ```javascript
-[
-    {name:"Matthew", color:'red',    num:"90"},
-    {name:"Peter",   color:'red',    num:"8"}
-].dump();
+db.dump({ exclude:[ field, field, field ] });
 ```
 
-You can also exclude columns
-
-ex. 
-```javascript 
-[
-    {name:"Peter",   color:'red',    num:"8"}
-].dump({exclude:["num"]});
-```
+*This function is _NOT_ chainable*
 
 ### Sample Database
+For your cutting and pasting needs. :wink:
 
 ```javascript
 db = [
@@ -74,16 +70,6 @@ db = [
     {name:"Angie",   color:'blue',   num:"300"}
 ];
 ```
-
-### Syntax
-
-- Quotes are required for [or] / [and] arguments (ex. "blue" or "yellow")
-- You can use [==] or [like]
-- obj.query(query, true) // Will dump out the query breakdown (debug)
-- obj.query(query).dump() // Will create a pretty table
-- obj.query(query).dump({exclude:["num"]}) // Will exclude the num field from the table dump
-- obj.sortCol("name").dump({exclude:["num"]}) // Will sort by name and exclude the num field
-- obj.query(query).sortCol("num").dump() // Will preform a query then sort the results by number
 
 ### Examples
 
@@ -107,7 +93,7 @@ db.query("name == ^[a-z].*", true).dump();
 </pre>
 
 ```javascript
-// Regex + and (Ends with an e and are blue)
+// Ends with an e and are blue
 db.query("name == e$ && color like blue", true).dump({exclude:"num"});;
 ```
 <pre>
@@ -128,7 +114,7 @@ db.query("name == e$ && color like blue", true).dump({exclude:"num"});;
 </pre>
 
 ```javascript
-// or
+// or (quotes are very important here)
 console.log(db.query('color == "blue" or "yellow"'));
 
 [ { name: 'Alice', color: 'blue' },
@@ -142,8 +128,8 @@ console.log(db.query('color == "blue" or "yellow"'));
 ```
 
 ```javascript
-// multi query 'and'
-db.query('name == "Molly" or "Sandy" or "Lucy" or "Alice" && color == green').dump();
+// Multiple or's plus a second query
+db.query('name == "Molly" or "Lucy" or "Alice" && color == green').dump();
 ```
 <pre>
 +--------+--------+------+
@@ -151,12 +137,11 @@ db.query('name == "Molly" or "Sandy" or "Lucy" or "Alice" && color == green').du
 +--------+--------+------+
 ! Lucy   ! green  ! 0.2  !
 ! Molly  ! green  ! 50   !
-! Sandy  ! green  ! 10   !
 +--------+--------+------+
 </pre>
 
 ```javascript
-// multi query 'or' -- (Yes, Jeff the Red dosn't exist)
+// Multi Query -- (Yes, Jeff the Red dosn't exist)
 db.query('name == "Jeff the Red" or "Sandy" or "Alice" || ' +
             'color == red || num == 300', true).sortCol("name").dump();
 ```
@@ -184,7 +169,6 @@ db.query('name == "Jeff the Red" or "Sandy" or "Alice" || ' +
 // Number sort reversed
 db.sortCol("num",{reverse:true}).dump();
 ```
-
 <pre>
 +----------+---------+------+
 ! name     ! color   ! num  !
@@ -225,8 +209,9 @@ db.query('name == ^.$', true).dump();
 
 ```javascript
 // Use Vars
-var color = "blue";
+var color  = "blue";
 var color2 = "yellow";
+
 db.query(`color == "${color}" or "${color2}"`).sortCol("color").dump({exclude:["num"]});
 ```
 <pre>
@@ -256,6 +241,68 @@ db.query(`name like matthew`).dump();
 +----------+--------+------+
 </pre>
 
-### Todo
+```javascript
+// Greater then or equals 
+db.query(`num <= 10`).dump();
+```
+<pre>
++--------+---------+------+
+! name   ! color   ! num  !
++--------+---------+------+
+! Peter  ! red     ! 8    !
+! Alice  ! blue    !      !
+! alex   ! blue    ! 0.1  !
+! Grace  ! blue    ! 0.3  !
+! steve  ! yellow  ! 0    !
+! Q      ! yellow  !      !
+! Lucy   ! green   ! 0.2  !
+! Sandy  ! green   ! 10   !
++--------+---------+------+
+</pre>
 
-- Better Number handling for Queries
+```javascript
+// Less then or equals 
+db.query(`num >= 10`).dump();
+```
+<pre>
++----------+---------+------+
+! name     ! color   ! num  !
++----------+---------+------+
+! Matthew  ! red     ! 90   !
+! Alice    ! blue    !      !
+! Frank    ! blue    ! 70   !
+! Q        ! yellow  !      !
+! Jeff     ! yellow  ! 20   !
+! Molly    ! green   ! 50   !
+! Sandy    ! green   ! 10   !
+! Angie    ! blue    ! 300  !
++----------+---------+------+
+</pre>
+
+```javascript
+// Testing null vaules
+db.query('num != null', true).dump();
+```
+<pre>
++------+-----+--------+
+! key  ! op  ! value  !
++------+-----+--------+
+! num  ! !=  ! null   !
++------+-----+--------+
++----------+---------+------+
+! name     ! color   ! num  !
++----------+---------+------+
+! Matthew  ! red     ! 90   !
+! Peter    ! red     ! 8    !
+! alex     ! blue    ! 0.1  !
+! Frank    ! blue    ! 70   !
+! Grace    ! blue    ! 0.3  !
+! steve    ! yellow  ! 0    !
+! Jeff     ! yellow  ! 20   !
+! Lucy     ! green   ! 0.2  !
+! Molly    ! green   ! 50   !
+! Sandy    ! green   ! 10   !
+! Angie    ! blue    ! 300  !
++----------+---------+------+
+</pre>
+
