@@ -1,0 +1,22 @@
+{
+  "name": "objectdb",
+  "version": "1.0.0",
+  "description": "Object database consists of three `prototype` functions that extend array. - [Object Database](#object-database)     - [The `query` function](#the-query-function)     - [The `sortCol` function](#the-sortcol-function)     - [The `dump` function](#the-dump-function)     - [Sample Database](#sample-database)     - [Examples](#examples)",
+  "main": "parse.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hazlema/Object-Database.git"
+  },
+  "author": "Matthew Hazlett",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hazlema/Object-Database/issues"
+  },
+  "homepage": "https://github.com/hazlema/Object-Database#readme",
+  "dependencies": {
+    "ansi": "^0.3.1"
+  }
+}
